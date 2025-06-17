@@ -1,0 +1,175 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      font-family: 'Arial', sans-serif;
+    }
+    .calculator {
+      background-color: #2a2a2a;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    .display {
+      background-color: #3a3a3a;
+      color: #ffffff;
+      font-size: 2.5rem;
+      text-align: right;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .btn {
+      background-color: #4a4a4a;
+      color: #ffffff;
+      font-size: 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #5a5a5a;
+    }
+    .operator {
+      background-color: #ff9500;
+    }
+    .operator:hover {
+      background-color: #ffaa33;
+    }
+    .equals {
+      background-color: #28a745;
+    }
+    .equals:hover {
+      background-color: #2cc55b;
+    }
+    .clear {
+      background-color: #dc3545;
+    }
+    .clear:hover {
+      background-color: #e4606d;
+    }
+    .footer {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      color: #ffffff;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center h-screen">
+  <div class="calculator p-6 w-80 md:w-96">
+    <div class="display" id="display">0</div>
+    <div class="grid grid-cols-4 gap-2">
+      <button class="btn clear col-span-2" onclick="clearDisplay()">C</button>
+      <button class="btn" onclick="deleteLast()">⌫</button>
+      <button class="btn operator" onclick="appendToDisplay('/')">÷</button>
+      <button class="btn" onclick="appendToDisplay('7')">7</button>
+      <button class="btn" onclick="appendToDisplay('8')">8</button>
+      <button class="btn" onclick="appendToDisplay('9')">9</button>
+      <button class="btn operator" onclick="appendToDisplay('*')">×</button>
+      <button class="btn" onclick="appendToDisplay('4')">4</button>
+      <button class="btn" onclick="appendToDisplay('5')">5</button>
+      <button class="btn" onclick="appendToDisplay('6')">6</button>
+      <button class="btn operator" onclick="appendToDisplay('-')">−</button>
+      <button class="btn" onclick="appendToDisplay('1')">1</button>
+      <button class="btn" onclick="appendToDisplay('2')">2</button>
+      <button class="btn" onclick="appendToDisplay('3')">3</button>
+      <button class="btn operator" onclick="appendToDisplay('+')">+</button>
+      <button class="btn" onclick="appendToDisplay('0')">0</button>
+      <button class="btn" onclick="appendToDisplay('.')">.</button>
+      <button class="btn equals col-span-2" onclick="calculate()">=</button>
+    </div>
+  </div>
+  <div class="footer">by: Ars-byte</div>
+
+  <script>
+    let display = document.getElementById('display');
+    let currentInput = '0';
+
+    function appendToDisplay(value) {
+      if (currentInput === '0' && value !== '.') {
+        currentInput = value;
+      } else {
+        currentInput += value;
+      }
+      updateDisplay();
+    }
+
+    function clearDisplay() {
+      currentInput = '0';
+      updateDisplay();
+    }
+
+    function deleteLast() {
+      currentInput = currentInput.slice(0, -1);
+      if (currentInput === '') {
+        currentInput = '0';
+      }
+      updateDisplay();
+    }
+
+    function calculate() {
+      try {
+        currentInput = eval(currentInput).toString();
+        updateDisplay();
+      } catch {
+        currentInput = 'Error';
+        updateDisplay();
+        currentInput = '0';
+      }
+    }
+
+    function updateDisplay() {
+      display.textContent = currentInput;
+    }
+  </script>
+</body>
+</html>
