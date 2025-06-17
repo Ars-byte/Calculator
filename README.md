@@ -48,6 +48,10 @@ Example:
 
 
 
+https://github.com/user-attachments/assets/d078710a-f7cd-4a48-b63c-d7ba064ab123
+
+
+
 
 ### Spanish Description:
 
@@ -96,3 +100,6 @@ Usa los botones en pantalla para ingresar números y realizar cálculos.
 Puedes copiar y pegar la versión que prefieras (o ambas) en tu archivo README.md. La nota sobre el script gk_isXlsx es opcional pero aclara que no forma parte de la lógica central de la calculadora.
 
 Ejemplo:
+
+
+https://github.com/user-attachments/assets/d078710a-f7cd-4a48-b63c-d7ba064ab123
